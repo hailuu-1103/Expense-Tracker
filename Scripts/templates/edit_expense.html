@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Expense</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<header>
+  <div class="container">
+    <div id="branding">
+      <h1>Expense Tracker</h1>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index') }}">Home</a></li>
+        <li><a href="{{ url_for('add_expense') }}">Add Expense</a></li>
+        <li><a href="{{ url_for('summary') }}">View Summary</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<div class="container" id="main">
+  <h1>Edit Expense</h1>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  <div class="message {{ category }}">{{ message }}</div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+  <form method="post">
+    <label>Date:</label>
+    <input type="date" name="date" value="{{ expense.year }}-{{ '{:02d}'.format(expense.month | int) }}-{{ '{:02d}'.format(expense.day | int) }}" required>
+    <label>Description:</label>
+    <input type="text" name="description" value="{{ expense.description }}" required>
+    <label>Amount:</label>
+    <input type="number" name="amount" value="{{ expense.amount }}" required>
+    <label>Category:</label>
+    <select name="category" required>
+      <option value="Food" {% if expense.category == 'Food' %}selected{% endif %}>Food</option>
+      <option value="Work_Study" {% if expense.category == 'Work_Study' %}selected{% endif %}>Work_Study</option>
+      <option value="Transportation" {% if expense.category == 'Transportation' %}selected{% endif %}>Transportation</option>
+      <option value="Monthly_Payment" {% if expense.category == 'Monthly_Payment' %}selected{% endif %}>Monthly_Payment</option>
+      <option value="Enjoyable" {% if expense.category == 'Enjoyable' %}selected{% endif %}>Enjoyable</option>
+      <option value="Others" {% if expense.category == 'Others' %}selected{% endif %}>Others</option>
+    </select>
+    <input type="submit" value="Edit Expense">
+  </form>
+  <a class="button" href="{{ url_for('index') }}">Back</a>
+</div>
+<footer>
+  <p>&copy; 2024 Expense Tracker</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Expense Summary</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="{{ url_for('static', filename='chart.js') }}"></script>
+</head>
+<body>
+<header>
+  <div class="container">
+    <div id="branding">
+      <h1>Expense Tracker</h1>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index') }}">Home</a></li>
+        <li><a href="{{ url_for('add_expense') }}">Add Expense</a></li>
+        <li><a href="{{ url_for('summary') }}">View Summary</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<div class="container" id="main">
+  <h1>Expense Summary by Category</h1>
+  <div class="chart-container">
+    <canvas id="myPieChart"></canvas>
+  </div>
+  <script>
+    document.getElementById('categories').textContent = '{{ categories | tojson }}';
+    document.getElementById('amounts').textContent = '{{ amounts | tojson }}';
+  </script>
+  <div id="categories" style="display: none;">{{ categories | tojson }}</div>
+  <div id="amounts" style="display: none;">{{ amounts | tojson }}</div>
+  <a class="button" href="{{ url_for('index') }}">Back</a>
+</div>
+<footer>
+  <p>&copy; 2024 Expense Tracker</p>
+</footer>
+</body>
+</html>
