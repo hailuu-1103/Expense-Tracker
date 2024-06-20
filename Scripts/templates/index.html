@@ -7,6 +7,7 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script>
         function confirmDelete(expenseId) {
@@ -14,6 +15,32 @@
                 window.location.href = "/delete/" + expenseId;
             }
         }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            var ctx = document.getElementById('expenseChart').getContext('2d');
+            var expenseChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                        datasets: [{
+                            label: 'Total Expenses',
+                            data: {{ monthly_expenses|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+        }]
+        },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+        });
     </script>
     <style>
         body {
@@ -57,6 +84,10 @@
     {% endif %}
     {% endwith %}
     <a class="btn btn-primary mb-3" href="{{ url_for('add_expense') }}">Add Expense</a>
+
+    <div class="mb-4">
+        <canvas id="expenseChart"></canvas>
+    </div>
 
     <div class="row">
         {% for category, expenses in categorized_expenses.items() %}

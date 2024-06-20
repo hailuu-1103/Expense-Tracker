@@ -24,13 +24,21 @@ def index():
     categories = ['Food', 'Work_Study', 'Transportation', 'Monthly_Payment', 'Enjoyable', 'Others']
     categorized_expenses = {category: Expense.query.filter_by(category=category).all() for category in categories}
 
+    # Calculate total expenses for each month
+    monthly_expenses = [0] * 12
+    expenses = Expense.query.all()
+    for expense in expenses:
+        month = int(expense.month)
+        amount = float(expense.amount)
+        monthly_expenses[month - 1] += amount
+
     # Pre-process the data
     for expenses in categorized_expenses.values():
         for expense in expenses:
             expense.day = int(expense.day)
             expense.month = int(expense.month)
 
-    return render_template('index.html', categorized_expenses=categorized_expenses)
+    return render_template('index.html', categorized_expenses=categorized_expenses, monthly_expenses=monthly_expenses)
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_expense():
