@@ -1,7 +1,8 @@
-﻿from flask import Flask, render_template, request, redirect, url_for, flash
+﻿from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from enum import Enum
+import pandas as pd
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///expenses.db'
@@ -68,7 +69,6 @@ def index():
     return render_template('index.html', categorized_expenses=categorized_expenses, monthly_expenses_2023=monthly_expenses_2023, monthly_expenses_2024=monthly_expenses_2024)
 
 
-
 @app.route('/add', methods=['GET', 'POST'])
 def add_expense():
     if request.method == 'POST':
@@ -98,7 +98,7 @@ def edit_expense(id):
     if request.method == 'POST':
         try:
             date_str = request.form['date']
-            date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+            date_obj = datetime.strptime(date_str, '%d/%m/%Y')
             expense.date = date_obj
             expense.description = request.form['description']
             expense.amount = float(request.form['amount'])
@@ -141,6 +141,42 @@ def summary():
     amounts = list(summary.values())
 
     return render_template('summary.html', categories=categories, amounts=amounts)
+
+
+@app.route('/import', methods=['GET', 'POST'])
+def import_data():
+    preview_data = []
+    if request.method == 'POST':
+        try:
+            file = request.files['file']
+            if file.filename.endswith('.xlsx') or file.filename.endswith('.xls'):
+                df = pd.read_excel(file)
+            elif file.filename.endswith('.csv'):
+                df = pd.read_csv(file)
+            else:
+                flash('Unsupported file format. Please upload a .xlsx, .xls, or .csv file.', 'error')
+                return redirect(url_for('import_data'))
+
+            if 'preview' in request.form:
+                preview_data = df.to_dict('records')
+                session['preview_data'] = preview_data
+            elif 'import' in request.form:
+                preview_data = session.get('preview_data', [])
+                for row in preview_data:
+                    date = datetime.strptime(str(row['Date']), '%d/%m/%Y')
+                    description = row['Description']
+                    amount = float(row['Amount'])
+                    category = row['Category']
+                    payment_method = row['Payment Method']
+                    new_expense = Expense(date=date, description=description, amount=amount, category=category, payment_method=payment_method)
+                    db.session.add(new_expense)
+                print(db.session)
+                db.session.commit()
+                flash('Data imported successfully!', 'success')
+                return redirect(url_for('index'))
+        except Exception as e:
+            flash(f'Error: {e}', 'error')
+    return render_template('import.html', preview_data=preview_data)
 
 
 if __name__ == '__main__':
