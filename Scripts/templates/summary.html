@@ -2,41 +2,99 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Expense Summary</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <title>Expense Summary by Category</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="{{ url_for('static', filename='chart.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    body {
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+    main {
+      flex: 1;
+    }
+    footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 10px 0;
+    }
+    .chart-container {
+      position: relative;
+      margin: auto;
+      height: 50vh;
+      width: 50vw;
+    }
+  </style>
 </head>
 <body>
-<header>
+<header class="bg-dark text-white py-3">
   <div class="container">
-    <div id="branding">
-      <h1>Expense Tracker</h1>
+    <div class="d-flex justify-content-between align-items-center">
+      <h1 class="h3">Expense Tracker</h1>
+      <nav>
+        <ul class="nav">
+          <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('index') }}">Home</a></li>
+          <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('add_expense') }}">Add Expense</a></li>
+          <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('summary') }}">View Summary</a></li>
+        </ul>
+      </nav>
     </div>
-    <nav>
-      <ul>
-        <li><a href="{{ url_for('index') }}">Home</a></li>
-        <li><a href="{{ url_for('add_expense') }}">Add Expense</a></li>
-        <li><a href="{{ url_for('summary') }}">View Summary</a></li>
-      </ul>
-    </nav>
   </div>
 </header>
-<div class="container" id="main">
-  <h1>Expense Summary by Category</h1>
+<main class="container my-4">
+  <h1 class="mb-4">Expense Summary by Category</h1>
   <div class="chart-container">
-    <canvas id="myPieChart"></canvas>
+    <canvas id="categoryChart"></canvas>
   </div>
-  <script>
-    document.getElementById('categories').textContent = '{{ categories | tojson }}';
-    document.getElementById('amounts').textContent = '{{ amounts | tojson }}';
-  </script>
-  <div id="categories" style="display: none;">{{ categories | tojson }}</div>
-  <div id="amounts" style="display: none;">{{ amounts | tojson }}</div>
-  <a class="button" href="{{ url_for('index') }}">Back</a>
-</div>
+  <a href="{{ url_for('index') }}" class="btn btn-secondary mt-3">Back</a>
+</main>
 <footer>
   <p>&copy; 2024 Expense Tracker</p>
 </footer>
+<script>
+  document.addEventListener('DOMContentLoaded', (event) => {
+    var ctx = document.getElementById('categoryChart').getContext('2d');
+    var categoryChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: {{ categories | safe }},
+    datasets: [{
+      label: 'Expenses by Category',
+      data: {{ amounts | safe }},
+    backgroundColor: [
+      'rgba(255, 99, 132, 0.2)',
+      'rgba(54, 162, 235, 0.2)',
+      'rgba(255, 206, 86, 0.2)',
+      'rgba(75, 192, 192, 0.2)',
+      'rgba(153, 102, 255, 0.2)',
+      'rgba(255, 159, 64, 0.2)'
+    ],
+            borderColor: [
+      'rgba(255, 99, 132, 1)',
+      'rgba(54, 162, 235, 1)',
+      'rgba(255, 206, 86, 1)',
+      'rgba(75, 192, 192, 1)',
+      'rgba(153, 102, 255, 1)',
+      'rgba(255, 159, 64, 1)'
+    ],
+            borderWidth: 1
+  }]
+  },
+    options: {
+      responsive: true,
+              maintainAspectRatio: false,
+              legend: {
+        position: 'top',
+      },
+    }
+  });
+  });
+</script>
 </body>
 </html>
