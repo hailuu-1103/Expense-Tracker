@@ -33,6 +33,9 @@
         .card {
             margin-bottom: 20px;
         }
+        .switch-button {
+            margin: 20px;
+        }
     </style>
 </head>
 <body>
@@ -52,9 +55,15 @@
 </header>
 <main class="container my-4">
     <h1 class="mb-4">Expenses</h1>
+    <div class="text-right">
+        <button class="btn btn-warning switch-button" onclick="switchYear(2023)">2023</button>
+        <button class="btn btn-warning switch-button" onclick="switchYear(2024)">2024</button>
+    </div>
     <div class="chart-container">
         <canvas id="monthlyExpensesChart"></canvas>
     </div>
+    <script id="expensesData2023" type="application/json">{{ monthly_expenses_2023 | tojson | safe }}</script>
+    <script id="expensesData2024" type="application/json">{{ monthly_expenses_2024 | tojson | safe }}</script>
     <div class="row">
         {% for category, expenses in categorized_expenses.items() %}
         <div class="col-md-6">
@@ -106,36 +115,6 @@
 <footer>
     <p>&copy; 2024 Expense Tracker</p>
 </footer>
-<script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-        var ctx = document.getElementById('monthlyExpensesChart').getContext('2d');
-        var monthlyExpensesChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-                    datasets: [{
-                        label: 'Expenses',
-                        data: {{ monthly_expenses | safe }},
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
-    }]
-    },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-    });
-
-    function confirmDelete(expenseId) {
-        if (confirm('Are you sure you want to delete this expense?')) {
-            window.location.href = '/delete/' + expenseId;
-        }
-    }
-</script>
+<script src="{{ url_for('static', filename='chart.js') }}"></script>
 </body>
 </html>

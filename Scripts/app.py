@@ -8,6 +8,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///expenses.db'
 app.config['SECRET_KEY'] = 'your_secret_key'
 db = SQLAlchemy(app)
 
+
 class CategoryEnum(Enum):
     Food = 'Food'
     Work_Study = 'Work_Study'
@@ -16,9 +17,11 @@ class CategoryEnum(Enum):
     Enjoyable = 'Enjoyable'
     Others = 'Others'
 
+
 class PaymentMethodEnum(Enum):
     Banking = 'Banking'
     Cash = 'Cash'
+
 
 class Expense(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -28,30 +31,43 @@ class Expense(db.Model):
     category = db.Column(db.Enum(CategoryEnum), nullable=False)
     payment_method = db.Column(db.Enum(PaymentMethodEnum), nullable=False)
 
-# Drop and recreate the database schema
+
 with app.app_context():
     db.create_all()
+
 
 # Custom filter to format the amount
 def format_vnd(value):
     return "{:,.0f} VNĐ".format(value).replace(',', '.')
 
+
 app.jinja_env.filters['format_vnd'] = format_vnd
+
 
 @app.route('/')
 def index():
     categories = [category.value for category in CategoryEnum]
     categorized_expenses = {category: Expense.query.filter_by(category=category).all() for category in categories}
 
-    # Calculate total expenses for each month
-    monthly_expenses = [0] * 12
-    expenses = Expense.query.all()
-    for expense in expenses:
+    # Calculate total expenses for each month in 2023
+    monthly_expenses_2023 = [0] * 12
+    expenses_2023 = Expense.query.filter(Expense.date.between('2023-01-01', '2023-12-31')).all()
+    for expense in expenses_2023:
         month = expense.date.month
         amount = expense.amount
-        monthly_expenses[month - 1] += amount
+        monthly_expenses_2023[month - 1] += amount
 
-    return render_template('index.html', categorized_expenses=categorized_expenses, monthly_expenses=monthly_expenses)
+    # Calculate total expenses for each month in 2024
+    monthly_expenses_2024 = [0] * 12
+    expenses_2024 = Expense.query.filter(Expense.date.between('2024-01-01', '2024-12-31')).all()
+    for expense in expenses_2024:
+        month = expense.date.month
+        amount = expense.amount
+        monthly_expenses_2024[month - 1] += amount
+
+    return render_template('index.html', categorized_expenses=categorized_expenses, monthly_expenses_2023=monthly_expenses_2023, monthly_expenses_2024=monthly_expenses_2024)
+
+
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_expense():
@@ -98,6 +114,7 @@ def edit_expense(id):
     payment_methods = [method.value for method in PaymentMethodEnum]
     return render_template('edit_expense.html', expense=expense, categories=categories, payment_methods=payment_methods)
 
+
 @app.route('/delete/<int:id>')
 def delete_expense(id):
     try:
@@ -108,6 +125,7 @@ def delete_expense(id):
     except Exception as e:
         flash(f'Error: {e}', 'error')
     return redirect(url_for('index'))
+
 
 @app.route('/summary')
 def summary():
@@ -123,6 +141,7 @@ def summary():
     amounts = list(summary.values())
 
     return render_template('summary.html', categories=categories, amounts=amounts)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
